@@ -36,10 +36,11 @@ service cloud.firestore {
         && data.email is string && data.email.size() <= 256
         && data.displayName is string && data.displayName.size() <= 100
         && (!('username' in data) || (data.username is string && data.username.size() <= 50))
-        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2048))
-        && (!('about' in data) || (data.about is string && data.about.size() <= 300))
-        && (!('publicKey' in data) || (data.publicKey is string && data.publicKey.size() <= 1024))
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 65536))
+        && (!('about' in data) || (data.about is string && data.about.size() <= 500))
+        && (!('publicKey' in data) || (data.publicKey is string && data.publicKey.size() <= 4096))
         && (!('profileCompleted' in data) || data.profileCompleted is bool)
+        && (!('privacySettings' in data) || data.privacySettings is map)
         && (!('isOnline' in data) || data.isOnline is bool);
     }
 
@@ -57,9 +58,9 @@ service cloud.firestore {
         && data.uid is string && data.uid == request.auth.uid
         && data.displayName is string && data.displayName.size() <= 100
         && (!('username' in data) || (data.username is string && data.username.size() <= 50))
-        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2048))
-        && (!('about' in data) || (data.about is string && data.about.size() <= 300))
-        && (!('publicKey' in data) || (data.publicKey is string && data.publicKey.size() <= 1024))
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 65536))
+        && (!('about' in data) || (data.about is string && data.about.size() <= 500))
+        && (!('publicKey' in data) || (data.publicKey is string && data.publicKey.size() <= 4096))
         && (!('isOnline' in data) || data.isOnline is bool);
     }
 
@@ -70,7 +71,7 @@ service cloud.firestore {
         && data.email is string && data.email.size() <= 256
         && data.displayName is string && data.displayName.size() <= 100
         && (!('username' in data) || (data.username is string && data.username.size() <= 50))
-        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2048));
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 65536));
     }
 
     function isValidFriendRequest(data) {
@@ -82,7 +83,7 @@ service cloud.firestore {
         && data.status in ['pending', 'accepted', 'rejected', 'cancelled']
         && (!('fromDisplayName' in data) || (data.fromDisplayName is string && data.fromDisplayName.size() <= 100))
         && (!('fromEmail' in data) || (data.fromEmail is string && data.fromEmail.size() <= 256))
-        && (!('fromPhotoURL' in data) || (data.fromPhotoURL is string && data.fromPhotoURL.size() <= 2048))
+        && (!('fromPhotoURL' in data) || (data.fromPhotoURL is string && data.fromPhotoURL.size() <= 65536))
         && (!('toDisplayName' in data) || (data.toDisplayName is string && data.toDisplayName.size() <= 100))
         && (!('toEmail' in data) || (data.toEmail is string && data.toEmail.size() <= 256));
     }
@@ -131,7 +132,6 @@ service cloud.firestore {
       allow list: if false; // Strict PII protection
       allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming())
-        && incoming().createdAt == existing().createdAt
         && incoming().uid == existing().uid;
       allow delete: if isOwner(userId) && isValidId(userId);
     }
@@ -166,7 +166,6 @@ service cloud.firestore {
         && (existing().fromUid == request.auth.uid || existing().toUid == request.auth.uid)
         && incoming().fromUid == existing().fromUid
         && incoming().toUid == existing().toUid
-        && incoming().createdAt == existing().createdAt
         && incoming().status in ['pending', 'accepted', 'rejected', 'cancelled'];
       allow delete: if isSignedIn() && isValidId(requestId)
         && (existing().fromUid == request.auth.uid || existing().toUid == request.auth.uid);
@@ -174,13 +173,13 @@ service cloud.firestore {
 
     // 5. Friends Records
     match /friends/{friendshipId} {
-      allow get, list: if isSignedIn() && isValidId(friendshipId)
+      allow get: if isSignedIn() && isValidId(friendshipId)
         && (resource.data.userA == request.auth.uid || resource.data.userB == request.auth.uid);
+      allow list: if isSignedIn();
       allow create: if isSignedIn() && isValidId(friendshipId) && isValidFriendship(incoming());
       allow update: if isSignedIn() && isValidId(friendshipId) && isValidFriendship(incoming())
         && incoming().userA == existing().userA
-        && incoming().userB == existing().userB
-        && incoming().createdAt == existing().createdAt;
+        && incoming().userB == existing().userB;
       allow delete: if isSignedIn() && isValidId(friendshipId)
         && (existing().userA == request.auth.uid || existing().userB == request.auth.uid);
     }
@@ -194,7 +193,6 @@ service cloud.firestore {
       allow update: if isSignedIn() && isValidId(conversationId)
         && request.auth.uid in existing().participantUids
         && incoming().conversationId == existing().conversationId
-        && incoming().createdAt == existing().createdAt
         && incoming().participantUids == existing().participantUids;
       allow delete: if isSignedIn() && isValidId(conversationId)
         && request.auth.uid in existing().participantUids;
@@ -209,7 +207,6 @@ service cloud.firestore {
           && incoming().messageId == existing().messageId
           && incoming().senderId == existing().senderId
           && incoming().recipientId == existing().recipientId
-          && incoming().createdAt == existing().createdAt
           && incoming().diff(existing()).affectedKeys().hasOnly(['status']);
         allow delete: if isSignedIn() && isValidId(messageId)
           && existing().senderId == request.auth.uid;

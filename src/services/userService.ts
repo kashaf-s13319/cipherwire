@@ -102,10 +102,12 @@ export async function syncUserProfile(
   // If existing user already completed profile, preserve it; otherwise false
   const isProfileCompleted = existingUser?.profileCompleted ?? false;
 
+  const safeDisplayName = displayName.trim() || existingUser?.displayName || email.split('@')[0] || 'User';
+
   const userProfile: UserProfile = {
     uid,
     email: email.trim().toLowerCase(),
-    displayName: displayName || (existingUser?.displayName ?? ''),
+    displayName: safeDisplayName,
     username: existingUser?.username || '',
     photoURL: photoURL || existingUser?.photoURL || '',
     about: existingUser?.about || 'Hey there! I am using CipherWire.',
@@ -124,7 +126,7 @@ export async function syncUserProfile(
 
   const publicProfile: PublicProfile = {
     uid,
-    displayName: userProfile.displayName,
+    displayName: safeDisplayName,
     username: userProfile.username,
     photoURL: userProfile.photoURL,
     about: userProfile.about,
@@ -137,7 +139,7 @@ export async function syncUserProfile(
   const emailLookup: EmailLookup = {
     uid,
     email: userProfile.email,
-    displayName: userProfile.displayName,
+    displayName: safeDisplayName,
     username: userProfile.username,
     photoURL: userProfile.photoURL,
     updatedAt: now,
