@@ -324,6 +324,10 @@ export const useAuth = (): AuthContextType => {
 };
 
 function mapAuthErrorMessage(errorMsg: string): string {
+  if (errorMsg.includes('auth/unauthorized-domain')) {
+    const host = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
+    return `auth/unauthorized-domain: This domain (${host}) is not added to Firebase Authorized Domains yet. Please add "${host}" under Firebase Console -> Authentication -> Settings -> Authorized domains, or use Email/Password which works on any device and domain without restriction.`;
+  }
   if (errorMsg.includes('auth/operation-not-allowed')) {
     return 'Email/Password sign-in is not enabled in Firebase Console yet. Please open Firebase Console -> Authentication -> Sign-in method, click Email/Password, and enable it. In the meantime, you can sign in directly with Google!';
   }

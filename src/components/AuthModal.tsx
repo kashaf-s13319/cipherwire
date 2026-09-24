@@ -10,9 +10,14 @@ import {
   CheckCircle2,
   Info,
   ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { FIREBASE_AUTH_PROVIDERS_URL } from '../firebase/config';
+import {
+  FIREBASE_AUTH_PROVIDERS_URL,
+  FIREBASE_AUTH_SETTINGS_URL,
+} from '../firebase/config';
 
 export const AuthModal: React.FC = () => {
   const {
@@ -31,6 +36,16 @@ export const AuthModal: React.FC = () => {
   const [displayName, setDisplayName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
+  const [copiedDomain, setCopiedDomain] = useState(false);
+
+  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
+
+  const handleCopyDomain = () => {
+    if (!currentHostname) return;
+    navigator.clipboard.writeText(currentHostname);
+    setCopiedDomain(true);
+    setTimeout(() => setCopiedDomain(false), 2500);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +128,74 @@ export const AuthModal: React.FC = () => {
               <div className="flex-1 font-medium leading-relaxed">{authError}</div>
             </div>
 
-            {authError.includes('Firebase Console') && (
+            {authError.includes('unauthorized-domain') && (
+              <div className="pt-2 border-t border-red-900/60 text-[11px] text-zinc-300 space-y-2.5">
+                <div className="bg-zinc-950/80 p-3 rounded-xl border border-zinc-800 space-y-2">
+                  <p className="font-semibold text-white">
+                    Authorize this domain in Firebase Console:
+                  </p>
+                  <p className="text-zinc-400 text-[11px] leading-relaxed">
+                    Google OAuth popups require each hosting domain to be allowlisted in your Firebase project.
+                  </p>
+
+                  <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                    <span className="font-mono text-emerald-400 text-xs flex-1 truncate select-all">
+                      {currentHostname}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyDomain}
+                      className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded text-[11px] font-medium transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+                    >
+                      {copiedDomain ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <ol className="list-decimal list-inside text-zinc-400 space-y-1 pl-1 text-[11px]">
+                    <li>Click the button below to open <strong className="text-white">Authorized domains</strong> in Firebase.</li>
+                    <li>Click <strong className="text-white">Add domain</strong> and paste <strong className="text-emerald-400">{currentHostname}</strong>.</li>
+                    <li>Click <strong className="text-white">Done</strong>, then try Google login again!</li>
+                  </ol>
+
+                  <div className="pt-1">
+                    <a
+                      href={FIREBASE_AUTH_SETTINGS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                    >
+                      <span>Open Authorized Domains Settings</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-emerald-400 font-medium">
+                    Or sign in with Email &amp; Password below (No domain limits!)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => clearAuthError()}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer text-[10px]"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {authError.includes('Firebase Console') && !authError.includes('unauthorized-domain') && (
               <div className="pt-2 border-t border-red-900/60 text-[11px] text-zinc-300 space-y-2.5">
                 <div className="bg-zinc-950/80 p-3 rounded-xl border border-zinc-800 space-y-1.5">
                   <p className="font-semibold text-white flex items-center gap-1.5">

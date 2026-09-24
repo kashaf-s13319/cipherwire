@@ -24,6 +24,7 @@ setPersistence(auth, browserLocalPersistence).catch((err) => {
 
 export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
 export const FIREBASE_AUTH_PROVIDERS_URL = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/providers`;
+export const FIREBASE_AUTH_SETTINGS_URL = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;
 
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
