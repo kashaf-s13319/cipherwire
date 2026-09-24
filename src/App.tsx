@@ -30,10 +30,26 @@ import {
   getOrCreateConversation,
 } from './services/chatService';
 import { getPublicProfile } from './services/userService';
-import { ShieldCheck, MessageSquare } from 'lucide-react';
+import { ShieldCheck, MessageSquare, WifiOff } from 'lucide-react';
 
 const MainApp: React.FC = () => {
   const { user, profile, loading, refreshProfile } = useAuth();
+  const [isOnline, setIsOnline] = useState<boolean>(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const isProfileIncomplete = Boolean(
     user && profile && (!profile.profileCompleted || !profile.username || profile.username.trim() === '')
@@ -203,6 +219,16 @@ const MainApp: React.FC = () => {
         pendingRequestsCount={friendRequests.received.length}
         totalFriendsCount={friends.length}
       />
+
+      {/* Offline Network Warning Banner */}
+      {!isOnline && (
+        <div className="bg-amber-950/80 border-b border-amber-800/80 px-4 py-2 text-xs text-amber-200 flex items-center justify-center gap-2 transition-all">
+          <WifiOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span>
+            You are operating in offline mode. CipherWire will automatically reconnect and sync when your network returns.
+          </span>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 flex overflow-hidden relative">
