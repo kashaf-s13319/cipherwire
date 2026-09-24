@@ -1,0 +1,6 @@
+{
+  "name": "CipherWire - Secure Real-Time Messaging",
+  "description": "A real-time cross-platform messaging application with end-to-end encryption, friend discovery, presence tracking, and instant delivery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

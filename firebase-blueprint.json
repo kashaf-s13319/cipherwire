@@ -1,0 +1,181 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Private profile of a registered user",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50 },
+        "photoURL": { "type": "string", "maxLength": 2048 },
+        "about": { "type": "string", "maxLength": 300 },
+        "publicKey": { "type": "string", "maxLength": 1024 },
+        "isOnline": { "type": "boolean" },
+        "lastSeen": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "profileCompleted": { "type": "boolean" },
+        "privacySettings": { "type": "object" }
+      },
+      "required": ["uid", "email", "displayName", "createdAt"]
+    },
+    "Username": {
+      "title": "Username",
+      "description": "Unique username registry to prevent collisions and impersonation",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string", "maxLength": 50 },
+        "uid": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["username", "uid", "createdAt"]
+    },
+    "PublicProfile": {
+      "title": "PublicProfile",
+      "description": "Public profile metadata for friend discovery and conversation participants",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50 },
+        "photoURL": { "type": "string", "maxLength": 2048 },
+        "about": { "type": "string", "maxLength": 300 },
+        "publicKey": { "type": "string", "maxLength": 1024 },
+        "isOnline": { "type": "boolean" },
+        "lastSeen": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName"]
+    },
+    "EmailLookup": {
+      "title": "EmailLookup",
+      "description": "Lookup directory mapping normalized email to user profile for safe friend search without collection scraping",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50 },
+        "photoURL": { "type": "string", "maxLength": 2048 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "displayName"]
+    },
+    "FriendRequest": {
+      "title": "FriendRequest",
+      "description": "Friend request invitation between two users",
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string", "maxLength": 256 },
+        "fromUid": { "type": "string", "maxLength": 128 },
+        "toUid": { "type": "string", "maxLength": 128 },
+        "fromDisplayName": { "type": "string", "maxLength": 100 },
+        "fromEmail": { "type": "string", "maxLength": 256 },
+        "fromPhotoURL": { "type": "string", "maxLength": 2048 },
+        "toDisplayName": { "type": "string", "maxLength": 100 },
+        "toEmail": { "type": "string", "maxLength": 256 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["requestId", "fromUid", "toUid", "status", "createdAt"]
+    },
+    "Friendship": {
+      "title": "Friendship",
+      "description": "Established mutual friendship between two users",
+      "type": "object",
+      "properties": {
+        "friendshipId": { "type": "string", "maxLength": 256 },
+        "userA": { "type": "string", "maxLength": 128 },
+        "userB": { "type": "string", "maxLength": 128 },
+        "users": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["friendshipId", "userA", "userB", "users", "createdAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "One-to-one conversation room between two users",
+      "type": "object",
+      "properties": {
+        "conversationId": { "type": "string", "maxLength": 256 },
+        "participantUids": { "type": "array" },
+        "participantData": { "type": "object" },
+        "lastMessage": { "type": "object" },
+        "typing": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["conversationId", "participantUids", "createdAt", "updatedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "End-to-end encrypted message in a conversation",
+      "type": "object",
+      "properties": {
+        "messageId": { "type": "string", "maxLength": 128 },
+        "conversationId": { "type": "string", "maxLength": 256 },
+        "senderId": { "type": "string", "maxLength": 128 },
+        "recipientId": { "type": "string", "maxLength": 128 },
+        "ciphertext": { "type": "string", "maxLength": 65536 },
+        "iv": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["sending", "sent", "delivered", "read"] },
+        "messageType": { "type": "string", "enum": ["text", "image", "file"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["messageId", "conversationId", "senderId", "recipientId", "ciphertext", "iv", "status", "createdAt"]
+    },
+    "BlockRecord": {
+      "title": "BlockRecord",
+      "description": "User block record to prevent communication",
+      "type": "object",
+      "properties": {
+        "blockId": { "type": "string", "maxLength": 256 },
+        "blockerUid": { "type": "string", "maxLength": 128 },
+        "blockedUid": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["blockId", "blockerUid", "blockedUid", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Private user profiles with personal settings and email"
+    },
+    "/publicProfiles/{userId}": {
+      "schema": { "$ref": "#/entities/PublicProfile" },
+      "description": "Public profiles accessible to registered users for name and E2EE public key lookup"
+    },
+    "/emailLookups/{lookupKey}": {
+      "schema": { "$ref": "#/entities/EmailLookup" },
+      "description": "Direct point-lookup for friend discovery by exact email, protected against listing"
+    },
+    "/friendRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/FriendRequest" },
+      "description": "Friend requests sent and received by users"
+    },
+    "/friends/{friendshipId}": {
+      "schema": { "$ref": "#/entities/Friendship" },
+      "description": "Mutual friendship records"
+    },
+    "/conversations/{conversationId}": {
+      "schema": { "$ref": "#/entities/Conversation" },
+      "description": "One-on-one encrypted conversation metadata"
+    },
+    "/conversations/{conversationId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Encrypted message payloads belonging to a conversation"
+    },
+    "/blocks/{blockId}": {
+      "schema": { "$ref": "#/entities/BlockRecord" },
+      "description": "Blocked user entries"
+    },
+    "/usernames/{username}": {
+      "schema": { "$ref": "#/entities/Username" },
+      "description": "Unique username registry mapping to UID"
+    }
+  }
+}
