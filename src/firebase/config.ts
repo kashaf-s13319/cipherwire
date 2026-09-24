@@ -3,6 +3,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   FacebookAuthProvider,
+  browserLocalPersistence,
+  setPersistence,
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -14,6 +16,14 @@ import firebaseConfig from '../../firebase-applet-config.json';
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
+
+// Explicitly configure local persistence so sessions persist across refreshes
+setPersistence(auth, browserLocalPersistence).catch((err) => {
+  console.warn('Could not set browserLocalPersistence:', err);
+});
+
+export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
+export const FIREBASE_AUTH_PROVIDERS_URL = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/providers`;
 
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });

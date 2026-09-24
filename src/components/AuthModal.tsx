@@ -9,8 +9,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Info,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { FIREBASE_AUTH_PROVIDERS_URL } from '../firebase/config';
 
 export const AuthModal: React.FC = () => {
   const {
@@ -105,24 +107,52 @@ export const AuthModal: React.FC = () => {
 
         {/* Auth error notification */}
         {authError && (
-          <div className="mb-5 p-4 rounded-2xl bg-red-950/40 border border-red-800/60 text-red-200 text-xs space-y-2">
+          <div className="mb-5 p-4 rounded-2xl bg-red-950/50 border border-red-800/80 text-red-200 text-xs space-y-3 shadow-lg">
             <div className="flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
               <div className="flex-1 font-medium leading-relaxed">{authError}</div>
             </div>
+
             {authError.includes('Firebase Console') && (
-              <div className="pt-2 border-t border-red-900/40 text-[11px] text-zinc-300 space-y-1">
-                <p>
-                  To enable Email/Password or Facebook login:
-                </p>
-                <ol className="list-decimal list-inside text-zinc-400 space-y-0.5 pl-1">
-                  <li>Visit your Firebase Console &rarr; Authentication &rarr; Sign-in method</li>
-                  <li>Click on <span className="text-white font-medium">Email/Password</span> and turn on <span className="text-white font-medium">Enable</span></li>
-                  <li>Click Save</li>
-                </ol>
-                <p className="pt-1 text-emerald-400 font-medium">
-                  Tip: &quot;Continue with Google&quot; is already enabled and works immediately!
-                </p>
+              <div className="pt-2 border-t border-red-900/60 text-[11px] text-zinc-300 space-y-2.5">
+                <div className="bg-zinc-950/80 p-3 rounded-xl border border-zinc-800 space-y-1.5">
+                  <p className="font-semibold text-white flex items-center gap-1.5">
+                    <span>How to enable Email/Password in 3 clicks:</span>
+                  </p>
+                  <ol className="list-decimal list-inside text-zinc-400 space-y-1 pl-1">
+                    <li>Click the button below to open your project&apos;s Authentication settings.</li>
+                    <li>Click on <strong className="text-white">Email/Password</strong> and toggle <strong className="text-emerald-400">Enable</strong> to ON.</li>
+                    <li>Click <strong className="text-white">Save</strong>, then return here!</li>
+                  </ol>
+                  <div className="pt-1.5">
+                    <a
+                      href={FIREBASE_AUTH_PROVIDERS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                    >
+                      <span>Open Firebase Console Settings</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={handleGoogleAuth}
+                    className="text-emerald-400 hover:text-emerald-300 font-medium underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Or sign in with Google (Works right now) &rarr;</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => clearAuthError()}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer text-[10px]"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
           </div>
